@@ -1,0 +1,15 @@
+# LITERAL1 specifies constants
+
+# KEYWORD1 specifies datatypes and C/C++ keywords
+
+# KEYWORD2 specifies methods and functions
+
+volume	KEYWORD2	SnakeCharmer_Volume
+refresh	KEYWORD2	SnakeCharmer_Refresh
+calibrate	KEYWORD2	SnakeCharmer_Calibrate
+digital	KEYWORD2	SnakeCharmer_Digital
+analog	KEYWORD2	SnakeCharmer_Analog
+
+# KEYWORD3 specifies objects
+
+SnakeCharmer	KEYWORD3	SnakeCharmer

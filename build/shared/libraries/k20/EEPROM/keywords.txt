@@ -1,0 +1,27 @@
+# LITERAL1 specifies constants
+
+# KEYWORD1 specifies datatypes and C/C++ keywords
+
+# KEYWORD2 specifies methods and functions
+
+read	KEYWORD2	EEPROM_Read
+read8	KEYWORD2	EEPROM_Read8
+read16	KEYWORD2	EEPROM_Read16
+read32	KEYWORD2	EEPROM_Read32
+readChar	KEYWORD2	EEPROM_ReadChar
+readInt	KEYWORD2	EEPROM_ReadInt
+readLong	KEYWORD2	EEPROM_ReadLong
+readBytes	KEYWORD2	EEPROM_ReadBytes
+
+write	KEYWORD2	EEPROM_Write
+write8	KEYWORD2	EEPROM_Write8
+write16	KEYWORD2	EEPROM_Write16
+write32	KEYWORD2	EEPROM_Write32
+writeChar	KEYWORD2	EEPROM_WriteChar
+writeInt	KEYWORD2	EEPROM_WriteInt
+writeLong	KEYWORD2	EEPROM_WriteLong
+writeBytes	KEYWORD2	EEPROM_WriteBytes
+
+# KEYWORD3 specifies objects
+
+EEPROM	KEYWORD3	EEPROM

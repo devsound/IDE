@@ -1,0 +1,9 @@
+# LITERAL1 specifies constants
+
+# KEYWORD1 specifies datatypes and C/C++ keywords
+
+# KEYWORD2 specifies methods and functions
+
+# KEYWORD3 specifies objects
+
+USBSerial	KEYWORD3	USBSerial

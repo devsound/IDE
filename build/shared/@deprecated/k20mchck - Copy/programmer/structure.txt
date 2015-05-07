@@ -1,0 +1,5 @@
+   hardware
+<= swdmchck-bitbang
+<= adiv5
+<= armv7:kinetisbase:kinetis
+<= flash

@@ -1,0 +1,2 @@
+Translation of gdbserver.rb is not required at this point.
+Translation of backend system not necessary - the only backend required is swd-mchck-bitbang.rb.

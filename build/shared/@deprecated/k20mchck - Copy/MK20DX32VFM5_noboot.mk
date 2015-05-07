@@ -1,0 +1,11 @@
+# MK20DX32VFM5 without bootloader
+TARGET_FAMILY=		K20
+
+FIXED_SECTIONS+=	-s 0:.isr_vector
+FIXED_SECTIONS+=	-s 0x400:.flash_config
+
+LOADER=		yes
+LOADER_SIZE=	32768
+LOADER_ADDR=	0
+APP_SIZE=	0
+APP_ADDR=	32768
