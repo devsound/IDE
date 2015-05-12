@@ -4,11 +4,8 @@
 * 2014-02-07 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
 
-#ifndef __UDAD_H__
-#define __UDAD_H__
-
-// Targets
-#define UDAD 1
+#ifndef __ARDUINO_H__
+#define __ARDUINO_H__
 
 // Compiler includes
 #include <stdint.h>
@@ -29,7 +26,30 @@ extern "C" {
 #define DMAMEM __attribute__ ((aligned (__BIGGEST_ALIGNMENT__)))
 
 // Named aliases for pin numbers
-// TODO: fill in PTxyy
+#define PTA0  12
+#define PTA1  13
+#define PTA2  14
+#define PTA3  15
+#define PTA4  16
+#define PTA18 17
+#define PTA19 18
+#define PTB0  20
+#define PTB1  21
+#define PTC1  22
+#define PTC2  23
+#define PTC3  24
+#define PTC4  25
+#define PTC5  26
+#define PTC6  27
+#define PTC7  28
+#define PTD4  29
+#define PTD5  30
+#define PTD6  31
+#define PTD7  32
+
+// Invalid MUX number for PORT peripheral
+// Also used for invalid chip select number for DSPI peripheral
+#define INVALID_PIN      9
 
 // Pin mode
 #define DEFAULT          0 // pin mode/adc reference
@@ -43,6 +63,7 @@ extern "C" {
 #define PWM              4
 #define PWM_OUT          4
 #define PWM_OUTPUT       4
+#define DSPI             5
 
 // Digital values
 #define LOW              0
@@ -104,9 +125,10 @@ void noTone(uint8_t pin);
 void __isr_systick();
 void __isr_udad_systick();
 void exit(int status);
+uint8_t chipSelectFromPin(uint8_t pin);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif//__ARDUINO_H__

@@ -8,6 +8,8 @@ static uint32_t volatile tickcount = 0;
 static volatile bool analog_read_en;
 static volatile uint16_t analog_read_data;
 
+#define X INVALID_PIN
+
 const struct {
   volatile struct PORT_t *port;
   volatile struct GPIO_t *gpio;
@@ -18,65 +20,82 @@ const struct {
   unsigned int ftm_ch;
   unsigned int adc_mux;
   unsigned int adc_ch;
+  unsigned int spi_mux;
+  unsigned int spi_cs;
 } pinmap[] = {
-  { NULL },                                      //  0
-  { NULL },                                      //  1 VBUS
-  { NULL },                                      //  2 DM
-  { NULL },                                      //  3 DP
-  { &PORTD, &GPIOD, 7, 2, 4, &FTM0, 7,  0, 31 }, //  4 TX    PTD7 3:TX       4:FTM0_CH7
-  { &PORTA, &GPIOA, 1, 2, 3, &FTM0, 6,  0, 31 }, //  5 RX    PTA1 2:RX       3:FTM0_CH6
-  { &PORTD, &GPIOD, 6, 0, 4, &FTM0, 6,  0,  7 }, //  6 AIN0  PTD6 0:AIN0     4:FTM0_CH6  0:ADC0_SE7b
-  { &PORTD, &GPIOD, 5, 0, 4, &FTM0, 5,  0,  6 }, //  7 AIN1  PTD5 0:AIN1     4:FTM0_CH5  0:ADC0_SE6b
-  { &PORTB, &GPIOB, 1, 2, 3, &FTM1, 1,  0,  9 }, //  8 SDA   PTB1 2:I2C_SDA  3:FRM1_CH1  0:ADC0_SE9
-  { &PORTB, &GPIOB, 0, 2, 3, &FTM1, 0,  0,  8 }, //  9 SCL   PTB0 2:I2C_SCL  3:FTM1_CH0  0:ADC0_SE8
-  { NULL },                                      // 10 DVDD
-  { NULL },                                      // 11 RHP
-  { NULL },                                      // 12 LHP
-  { NULL },                                      // 13 LIN
-  { NULL },                                      // 14 RIN
-  { NULL },                                      // 15 GND
-  { NULL },                                      // 16 MIC
-  { NULL },                                      // 17 BIAS
-  { NULL },                                      // 18 VMID
-  { NULL },                                      // 19 AVDD
-  { NULL },                                      // 20 ROUT
-  { NULL },                                      // 21 LOUT
-  { NULL },                                      // 22 HPVDD
-  { NULL },                                      // 23 RESET
-#if UDAD_REV >= 4
-  { &PORTA, &GPIOA, 2, 1, 3, &FTM0, 7, 31 },     // 24 GPIO0 PTA2            4:FTM0_CH7
-#else
-  { &PORTC, &GPIOC, 4, 1, 4, &FTM0, 3, 31 },     // 24 GPIO0 PTC4            4:FTM0_CH3
-#endif
-  { &PORTA, &GPIOA, 4, 1, 3, &FTM0, 1, 31 },     // 25 GPIO1 PTA4            3:FTM0_CH1
-  { &PORTD, &GPIOD, 4, 1, 4, &FTM0, 4, 31 },     // 26 GPIO2 PTD4            4:FTM0_CH4
-  { &PORTA, &GPIOA, 3, 7, 3, &FTM0, 0, 31 },     // 27 SWDC  PTA3 7:SWD_DIO  3:FTM0_CH0
-  { &PORTA, &GPIOA, 0, 7, 3, &FTM0, 6, 31 },     // 28 SWDD  PTA0 7:SWD_CLK  3:FTM0_CH5
+  { NULL },                                          //  0
+  { NULL },                                          //  1 VDD
+  { NULL },                                          //  2 VSS
+  { NULL },                                          //  3 USB0_DP
+  { NULL },                                          //  4 USB0_DM
+  { NULL },                                          //  5 VOUT33
+  { NULL },                                          //  6 VREGIN
+  { NULL },                                          //  7 VDDA
+  { NULL },                                          //  8 VSSA
+  { NULL },                                          //  9 XTAL32
+  { NULL },                                          // 10 EXTAL32
+  { NULL },                                          // 11 VBAT
+
+                                                     // ## NAME  WIRE         UART         FLEXTIMER   ANALOG
+  
+  { &PORTA, &GPIOA,  0, 2, 3, &FTM0,  5, 1,  X, X, X }, // 12 PTA0               2:UART0_CTS  3:FTM0_CH5
+  { &PORTA, &GPIOA,  1, 2, 3, &FTM0,  6, 1,  X, X, X }, // 13 PTA1               2:UART0_RX   3:FTM0_CH6
+  { &PORTA, &GPIOA,  2, 2, 3, &FTM0,  7, 1,  X, X, X }, // 14 PTA2               2:UART0_TX   3:FTM0_CH7
+  { &PORTA, &GPIOA,  3, 2, 3, &FTM0,  0, 1,  X, X, X }, // 15 PTA3               2:UART0_RTS  3:FTM0_CH0
+  { &PORTA, &GPIOA,  4, 3, 3, &FTM0,  1, 1,  X, X, X }, // 16 PTA4                            3:FTM0_CH1
+  { &PORTA, &GPIOA, 18, 1, X,  NULL,  X, 1,  X, X, X }, // 17 PTA18
+  { &PORTA, &GPIOA, 19, 1, X,  NULL,  X, 1,  X, X, X }, // 18 PTA19
+  
+  { NULL },                                          // 19 RESET
+
+  { &PORTB, &GPIOB,  0, 2, 3, &FTM1,  0, 0,  8, X, X }, // 20 PTB0  2:I2C0_SCL                3:FTM1_CH0  0:ADC0_SE8
+  { &PORTB, &GPIOB,  1, 2, 3, &FTM1,  1, 0,  9, X, X }, // 21 PTB1  2:I2C0_SDA                3:FTM1_CH1  0:ADC0_SE9
+
+  { &PORTC, &GPIOC,  1, 3, 4, &FTM0,  0, 0, 15, 2, 3 }, // 22 PTC1  2:SPI0_PCS3  3:UART1_RTS  4:FTM0_CH0  0:ADC0_SE15
+  { &PORTC, &GPIOC,  2, 3, 4, &FTM0,  1, 0,  4, 2, 2 }, // 23 PTC2  2:SPI0_PCS2  3:UART1_CTS  4:FTM0_CH1  0:ADC0_SE4B
+  { &PORTC, &GPIOC,  3, 3, 4, &FTM0,  2, 1,  X, 2, 1 }, // 24 PTC3  2:SPI0_PCS1  3:UART1_RX   4:FTM0_CH2
+  { &PORTC, &GPIOC,  4, 3, 4, &FTM0,  3, 1,  X, 2, 0 }, // 25 PTC4  2:SPI0_PCS0  3:UART1_TX   4:FTM0_CH3
+  { &PORTC, &GPIOC,  5, 2, X,  NULL,  0, 1,  X, 2, X }, // 26 PTC5  2:SPI0_SCK
+  { &PORTC, &GPIOC,  6, 2, X,  NULL,  0, 1,  X, 2, X }, // 27 PTC6  2:SPI0_SOUT
+  { &PORTC, &GPIOC,  7, 2, X,  NULL,  0, 1,  X, 2, X }, // 28 PTC7  2:SPI0_SIN
+
+  { &PORTD, &GPIOD,  4, 4, 4, &FTM0,  4, 1, -1, 2, 1 }, // 29 PTD4  2:SPI0_PCS1  3:UART0_RTS  4:FTM0_CH4
+  { &PORTD, &GPIOD,  5, 4, 4, &FTM0,  5, 0,  6, 2, 2 }, // 30 PTD5  2:SPI0_PCS2  3:UART0_CTS  4:FTM0_CH5  0:ADC0_SE6b
+  { &PORTD, &GPIOD,  6, 4, 4, &FTM0,  6, 0,  7, 2, 3 }, // 31 PTD6  2:SPI0_PCS3  3:UART0_RX   4:FTM0_CH6  0:ADC0_SE7b
+  { &PORTD, &GPIOD,  7, 4, 4, &FTM0,  7, 1, -1, X, X }, // 32 PTD7               3:UART0_TX   4:FTM0_CH7
 };
+
+#undef X
 
 // Fix static warnings
 #undef BITBAND_BIT
 #define BITBAND_BIT(var, bit) *((volatile uint32_t*)(0x42000000 + ((uintptr_t)&(var) - 0x40000000) * 32 + 4 * (bit)))
 
+inline uint8_t chipSelectFromPin(uint8_t pin) {
+  uint8_t cs = 0;
+  if(pin >= 1 && pin <= 32) cs = pinmap[pin].spi_cs;
+  if(cs == INVALID_PIN) cs = 0;
+  return cs;
+}
+
 inline void pinMode(uint8_t pin, int mode) {
+  unsigned mux = INVALID_PIN;
   switch(mode) {
-    case INPUT:
+    case INPUT:  mux = 1; // GPIO is always 1
       BITBAND_BIT(pinmap[pin].gpio->pddr, pinmap[pin].pin) = 0;
-      pinmap[pin].port->pcr[pinmap[pin].pin].mux = 1; // raw = ((struct PCR_t) { .mux = 1 }).raw;
       break;
-    case OUTPUT:
+    case OUTPUT: mux = 1; // GPIO is always 1
       BITBAND_BIT(pinmap[pin].gpio->pddr, pinmap[pin].pin) = 1;
-      pinmap[pin].port->pcr[pinmap[pin].pin].mux = 1; // raw = ((struct PCR_t) { .mux = 1 }).raw;
       break;
-    case ADC:
-      pinmap[pin].port->pcr[pinmap[pin].pin].mux = pinmap[pin].adc_mux; // raw = ((struct PCR_t) { .mux = pinmap[pin].adc_mux }).raw;
+    case ADC:    mux = pinmap[pin].adc_mux;
       break;
-    case PWM:
-      pinmap[pin].port->pcr[pinmap[pin].pin].mux = pinmap[pin].ftm_mux; // raw = ((struct PCR_t) { .mux = pinmap[pin].ftm_mux }).raw;
+    case PWM:    mux = pinmap[pin].ftm_mux;
       break;
-    default:
-      pinmap[pin].port->pcr[pinmap[pin].pin].mux = pinmap[pin].std_mux; // raw = ((struct PCR_t) { .mux = pinmap[pin].std_mux }).raw;
+    case DSPI:   mux = pinmap[pin].spi_mux;
+      break;
+    default:     mux = pinmap[pin].std_mux;
   }
+  if(mux != INVALID_PIN) pinmap[pin].port->pcr[pinmap[pin].pin].mux = mux;
 }
 
 inline void pinConfig(uint8_t pin, int config) {
@@ -178,12 +197,8 @@ void __isr_systick() {
   tickcount++;
 }
 
-void __isr_udad_systick() {
-  __isr_systick();
-}
-
 // Allows overriding default ISR by sketch (without any overhead as calls are optimized away)
-void isr_systick() __attribute__ ((weak, alias ("__isr_udad_systick")));
+void isr_systick() __attribute__ ((weak, alias ("__isr_systick")));
 
 void SysTick_Handler(void) {
   isr_systick();

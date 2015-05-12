@@ -1,3 +1,9 @@
+/*
+* Arduino device library for SnakeCharmer
+*
+* 2015-01-23 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
+*/
+
 #ifndef __UDAD_SNAKECHARMER__
 #define __UDAD_SNAKECHARMER__
 #include <udad.h>

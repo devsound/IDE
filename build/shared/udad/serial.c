@@ -1,7 +1,5 @@
 /*
-* Serial driver for UART0 on MCHCK
-*
-* Totally not ready for release, but works for µDAD
+* Serial driver for UART0 on K20
 *
 * 2014-01-08 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
@@ -101,42 +99,6 @@ void serial_put(uint8_t c) {
 	}).raw;
 }
 
-/*
-void serial_write(const void *buf, size_t count) {
-	const uint8_t *p = (const uint8_t *)buf;
-	const uint8_t *end = p + count;
-        uint32_t head;
-	if(!(SIM.scgc4.uart0)) return;
-	while (p < end) {
-    head = tx_buf_head;
-    if (++head >= BUF_SIZE) head = 0;
-		if (tx_buf_tail == head) {
-			UART0.c2.raw = ((struct UART_C2_t) {
-				.te = 1,
-				.re = 1,
-				.rie = 1,
-				.ilie = 1,
-				.tie = 1
-			}).raw;
-			while (tx_buf_tail == head);
-		}
-    tx_buf[head] = *p++;
-    tx_en = 1;
-    tx_buf_head = head;
-	}
-	UART0.c2.raw = ((struct UART_C2_t) {
-    .te = 1,
-    .re = 1,
-    .rie = 1,
-    .ilie = 1,
-	  .tie = 1
-	}).raw;
-}
-
-void serial_print(char *str) {
-  serial_write(str, strlen(str));
-}
-*/
 int serial_available(void) {
 	uint32_t head, tail;
 	head = rx_buf_head;
@@ -169,30 +131,40 @@ uint8_t serial_get(void) {
 }
 
 void __isr_uart0(void) {
-	uint32_t head, newhead, tail;
+	uint32_t head, newhead = 0, tail;
 	uint8_t avail;
 	uint8_t volatile c;
   
 	if(UART0.s1.rdrf || UART0.s1.idle) {
 		avail = UART0.rcfifo;
-		if(avail == 0) {
-			c = UART0.d;
-    	UART0.cfifo.raw = ((struct UART_CFIFO_t) {
-    	  .rxflush = 1
-    	}).raw;
-		} else {
-			head = rx_buf_head;
+		c = UART0.d; // Read first byte (or clear IDLE)
+		if(!avail) {
+		  // No data was available - this is an IDLE interrupt
+			if(UART0.sfifo.rxuf) {
+			  // RxFIFO underflowed - this is normal, set RXUF to clear
+			  UART0.sfifo.raw = ((struct UART_CFIFO_t) {
+      	  .rxuf= 1
+      	}).raw;
+      } else {
+        // RxFIFO did not underflow - meaning a byte must have been received
+        // after reading RCFIFO but before reading D to clear IDLE. Pass on.
+        avail = 1;
+      }
+		}
+		if(avail) {
+			head = rx_buf_head; // Fetch temporary copy of head, tail
 			tail = rx_buf_tail;
-			do {
-				c = UART0.d;
+			while(1) {
 				newhead = head + 1;
 				if (newhead >= BUF_SIZE) newhead = 0;
-				if (newhead != tail) {
+				if (newhead != tail) { // Check for buffer overflow
 					head = newhead;
 					rx_buf[head] = c;
 				}
-			} while (--avail > 0);
-			rx_buf_head = head;
+				if(--avail) c = UART0.d; // Read next byte
+				else break; // Done
+			}
+			rx_buf_head = head; // Push new head to RAM
 		}
 	}
 	if ((UART0.c2.tie) && (UART0.s1.tdre)) {

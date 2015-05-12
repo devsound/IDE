@@ -1,5 +1,13 @@
-#ifndef __UDAD_USBSERIAL__
-#define __UDAD_USBSERIAL__
+/*
+* Arduino wrapper for the USB and CDC VCP library by MCHCK
+*
+* Implements all classic Arduino functionality
+*
+* 2015-01-23 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
+*/
+
+#ifndef __K20_USBSERIAL__
+#define __K20_USBSERIAL__
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +27,7 @@ char   usbserial_get();
 
 #include "Stream.h"
 
-class const USBSerialClass : public Stream {
+class USBSerialClass : public Stream {
   public:
     inline USBSerialClass() {};
     void begin();

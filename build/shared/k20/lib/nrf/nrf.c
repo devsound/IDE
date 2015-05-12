@@ -245,7 +245,7 @@ send_command(struct nrf_transaction_t *trans, spi_cb *cb, void *data)
 		sg_init(trans->rx_sg, &trans->status, 1, trans->rx_data, trans->rx_len) :
 		sg_init(trans->rx_sg, &trans->status, 1);
 
-	spi_queue_xfer_sg(&trans->spi_ctx, NRF_SPI_CS, tx, rx, cb, data);
+	spi_queue_xfer_sg(&trans->spi_ctx, NRF_SPI_CS, tx, rx, cb, data, false);
 }
 
 static void

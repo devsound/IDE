@@ -76,7 +76,7 @@ spiflash_check_write_completed_spi_cb(void *cbdata)
         } else {
                 spi_queue_xfer(&trans->dev->flash_spi_ctx, trans->dev->cs,
                                trans->spi_query, 1, trans->spi_response, 2,
-                               spiflash_check_write_completed_spi_cb, trans);
+                               spiflash_check_write_completed_spi_cb, trans, false);
         }
 }
 
@@ -89,7 +89,7 @@ spiflash_transaction_dispatched_spi_cb(void *cbdata)
                 trans->spi_query[0] = 0x05;
                 spi_queue_xfer(&trans->dev->flash_spi_ctx, trans->dev->cs,
                                trans->spi_query, 1, trans->spi_response, 2,
-                               spiflash_check_write_completed_spi_cb, trans);
+                               spiflash_check_write_completed_spi_cb, trans, false);
         } else {
                 spiflash_transaction_done(trans);
         }
@@ -100,7 +100,7 @@ spiflash_run_transaction(struct spiflash_transaction *trans)
 {
         spi_queue_xfer_sg(&trans->dev->flash_spi_ctx.ctx, trans->dev->cs,
                           trans->flash_tx_sg, trans->flash_rx_sg,
-                          spiflash_transaction_dispatched_spi_cb, trans);
+                          spiflash_transaction_dispatched_spi_cb, trans, false);
 }
 
 static void
@@ -123,7 +123,7 @@ spiflash_schedule(struct spiflash_device *dev)
                 /* send write enable then run transaction */
                 spi_queue_xfer(&trans->dev->flash_spi_ctx, trans->dev->cs,
                                write_enable_cmd, 1, NULL, 0,
-                               spiflash_write_enabled_spi_cb, trans);
+                               spiflash_write_enabled_spi_cb, trans, false);
         } else {
                 spiflash_run_transaction(trans);
         }

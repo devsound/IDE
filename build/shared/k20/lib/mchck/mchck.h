@@ -10,7 +10,7 @@
 #include <mchck/flash.h>
 #include <mchck/onboard-led.h>
 #include <mchck/adc.h>
-#include <mchck/spi.h>
+#include <mchck/dspi.h>
 #include <mchck/timeout.h>
 #include <mchck/stdio.h>
 #include <mchck/ftm.h>

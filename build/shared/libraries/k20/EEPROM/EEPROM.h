@@ -1,3 +1,26 @@
+/*
+* Arduino wrapper for EEPROM peripheral library by PRJC
+*
+* Implements classic Arduino functionality:
+*   write(address, value) with aliases write8, writeChar
+*   read(address) with aliases read8, readChar
+*
+* Does not implement these exceptions:
+*   update(address, value)
+*   put(address, data)
+*   get(address, data)
+*
+* Also implements the following extensions:
+*   write16(address, value) with alias writeInt
+*   write32(address, value) with alias writeLong
+*   writeBytes(address, buffer, byteCount)
+*   read16(address) with alias readInt
+*   read32(address) with alias readLong
+*   readBytes(address, buffer, byteCount)
+*
+* 2015-04-11 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
+*/
+
 #ifndef __UDAD_EEPROM__
 #define __UDAD_EEPROM__
 #include <stdint.h>
