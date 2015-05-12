@@ -1,7 +1,5 @@
 /*
-* Serial driver for UART1 on µDAD
-*
-* Totally not ready for release, but works for µDAD
+* Serial driver for UART1 on K20
 *
 * 2014-01-08 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
@@ -34,6 +32,8 @@ void serial1_begin(uint32_t baudrate, enum SERIAL_e format) {
   tx_buf_tail = 0;
   tx_en = 0;
   
+  // TODO: Allow alternate pin locations?
+  pin_mode(PIN_PTC3, PIN_MODE_MUX_ALT3); // RX
   pin_mode(PIN_PTC4, PIN_MODE_MUX_ALT3); // TX
   
   UART1.bdh.raw = ((struct UART_BDH_t) {
@@ -57,12 +57,17 @@ void serial1_begin(uint32_t baudrate, enum SERIAL_e format) {
 	UART1.c3.raw = ((struct UART_C3_t) {
 		.t8 = 1
 	}).raw;
+  UART1.twfifo = 2;
+  UART1.rwfifo = 4;
   UART1.pfifo.raw = ((struct UART_PFIFO_t) {
     .txfe = 1,
     .rxfe = 1
   }).raw;
 	UART1.c2.raw  = ((struct UART_C2_t) {
-    .te = 1
+    .te = 1,
+    .re = 1,
+    .rie = 1,
+    .ilie = 1
   }).raw;
   int_enable(IRQ_UART1_status);
 }
@@ -87,50 +92,87 @@ void serial1_put(uint8_t c) {
 	tx_buf_head = head;
 	UART1.c2.raw = ((struct UART_C2_t) {
     .te = 1,
+    .re = 1,
+    .rie = 1,
+    .ilie = 1,
 	  .tie = 1
 	}).raw;
 }
 
-void serial1_write(const void *buf, size_t count) {
-	const uint8_t *p = (const uint8_t *)buf;
-	const uint8_t *end = p + count;
-        uint32_t head;
-	if(!(SIM.scgc4.uart1)) return;
-	while (p < end) {
-    head = tx_buf_head;
-    if (++head >= BUF_SIZE) head = 0;
-		if (tx_buf_tail == head) {
-			UART1.c2.raw = ((struct UART_C2_t) {
-				.te = 1,
-				.tie = 1
-			}).raw;
-			while (tx_buf_tail == head);
-		}
-    tx_buf[head] = *p++;
-    tx_en = 1;
-    tx_buf_head = head;
-	}
-	UART1.c2.raw = ((struct UART_C2_t) {
-    .te = 1,
-	  .tie = 1
-	}).raw;
+int serial1_available(void) {
+	uint32_t head, tail;
+	head = rx_buf_head;
+	tail = rx_buf_tail;
+	if (head >= tail) return head - tail;
+	return BUF_SIZE + head - tail;
+}
+
+uint8_t serial1_peek(void) {
+	uint32_t head, tail;
+	int c;
+	head = rx_buf_head;
+	tail = rx_buf_tail;
+	if (head == tail) return -1;
+	if (++tail >= BUF_SIZE) tail = 0;
+	c = rx_buf[tail];
+	return c;
+}
+
+uint8_t serial1_get(void) {
+	uint32_t head, tail;
+	int c;
+	head = rx_buf_head;
+	tail = rx_buf_tail;
+	if (head == tail) return -1;
+	if (++tail >= BUF_SIZE) tail = 0;
+	c = rx_buf[tail];
+	rx_buf_tail = tail;
+	return c;
 }
 
 void __isr_uart1(void) {
-	uint32_t head, tail;
+	uint32_t head, newhead, tail;
+	uint8_t avail;
 	uint8_t volatile c;
 
-	if((UART1.c2.tie) && (UART1.s1.tdre)) {
+	if(UART1.s1.rdrf || UART1.s1.idle) {
+		avail = UART1.rcfifo;
+		if(avail == 0) {
+			c = UART1.d;
+    	UART1.cfifo.raw = ((struct UART_CFIFO_t) {
+    	  .rxflush = 1
+    	}).raw;
+		} else {
+			head = rx_buf_head;
+			tail = rx_buf_tail;
+			do {
+				c = UART1.d;
+				newhead = head + 1;
+				if (newhead >= BUF_SIZE) newhead = 0;
+				if (newhead != tail) {
+					head = newhead;
+					rx_buf[head] = c;
+				}
+			} while (--avail > 0);
+			rx_buf_head = head;
+		}
+	}
+	if ((UART1.c2.tie) && (UART1.s1.tdre)) {
 		head = tx_buf_head;
 		tail = tx_buf_tail;
-    if(tail != head) {
+		do {
+			if (tail == head) break;
       if (++tail >= BUF_SIZE) tail = 0;
+			avail = UART1_S1;
       c = tx_buf[tail];
-      UART1.d = c;
-    }
+			UART1.d = c;
+		} while (UART1_TCFIFO < 8);
 		tx_buf_tail = tail;
-		if(UART1.s1.tdre) UART1.c2.raw = UART1.c2.raw = ((struct UART_C2_t) {
+		if (UART1.s1.tdre) UART1.c2.raw = UART1.c2.raw = ((struct UART_C2_t) {
 		  .te = 1,
+		  .re = 1,
+		  .rie = 1,
+		  .ilie = 1,
 		  .tcie = 1
     }).raw;
 	}
@@ -138,6 +180,9 @@ void __isr_uart1(void) {
 		tx_en = 0;
 		UART1.c2.raw = ((struct UART_C2_t) {
 		  .te = 1,
+		  .re = 1,
+		  .rie = 1,
+		  .ilie = 1
     }).raw;
 	}
 }

@@ -1,5 +1,7 @@
 /*
-* Hardware serial driver for DevSound K20 devices
+* Arduino wrapper for UART driver (HardwareSerial)
+*
+* Implements all classic Arduino functionality.
 *
 * 2014-02-07 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
@@ -28,7 +30,10 @@ int serial_available(void);
 
 void serial1_begin(uint32_t divisor, enum SERIAL_e format);
 void serial1_end(void);
+uint8_t serial1_get(void);
+uint8_t serial1_peek(void);
 void serial1_put(uint8_t c);
+int serial1_available(void);
 
 #ifdef __cplusplus
 }
@@ -61,9 +66,9 @@ static class Serial1Class : public Stream {
     inline void begin(uint32_t divisor, enum SERIAL_e format) { serial1_begin(divisor, format); }
     inline void begin(uint32_t divisor) { begin(divisor, SERIAL_8N1); }
     inline void end() {};
-    inline virtual int available(void) { return 0; } // No read
-    inline virtual int peek(void) { return -1; } // No read
-    inline virtual int read(void) { return -1; } // No read
+    inline virtual int available(void) { return serial1_available(); }
+    inline virtual int peek(void) { return serial1_peek(); }
+    inline virtual int read(void) { return serial1_get(); }
     inline int availableForWrite(void) { return 0; }
     inline virtual void flush(void) {}
     inline virtual size_t write(uint8_t n) { serial1_put((char)n); return 1; }
