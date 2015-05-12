@@ -1,3 +1,9 @@
+/*
+* Arduino core for DevSound µDAD
+*
+* 2014-02-07 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
+*/
+
 #include <mchck.h>
 #include "serial.h"
 #include "systick.h"
