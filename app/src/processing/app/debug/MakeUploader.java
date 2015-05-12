@@ -70,25 +70,21 @@ public class MakeUploader extends Uploader  {
       List baseUpload;
       if (verbose || Preferences.getBoolean("upload.verbose")) {
         baseUpload = new ArrayList(Arrays.asList(new String[] {
-          "make", "swd-flash", "MCHCKADAPTER=name=mchck:dev=" + uploadPort, "-C",  this.buildPath
+//          "make", "swd-flash", "MCHCKADAPTER=name=mchck:dev=" + uploadPort, "-C",  this.buildPath
+          binTools + "swd-util", uploadPort, "-v", "-a0xC00", this.buildPath
         }));
       } else {    
         baseUpload = new ArrayList(Arrays.asList(new String[] {
-          "make", "swd-flash", "MCHCKADAPTER=name=mchck:dev=" + uploadPort, "-s", "-C",  this.buildPath
+//          "make", "swd-flash", "MCHCKADAPTER=name=mchck:dev=" + uploadPort, "-s", "-C",  this.buildPath
+          binTools + "swd-util", uploadPort, "-s", "-a0xC00", this.buildPath
         }));
       }
       execAsynchronously(baseUpload);
     } else if(progMode.equals("DFU")) {
       List baseUpload;
-      if (verbose || Preferences.getBoolean("upload.verbose")) {
-        baseUpload = new ArrayList(Arrays.asList(new String[] {
-          binTools + "dfu-util", "-dDE50:0002", "-a0", "-i0", "-D" + this.buildPath + File.separator + "sketch.bin"
-        }));
-      } else {    
-        baseUpload = new ArrayList(Arrays.asList(new String[] {
-          binTools + "dfu-util", "-dDE50:0002", "-a0", "-i0", "-D" + this.buildPath + File.separator + "sketch.bin"
-        }));
-      }
+      baseUpload = new ArrayList(Arrays.asList(new String[] {
+        binTools + "dfu-util", "-dDE50:0002", "-a0", "-i0", "-D" + this.buildPath + File.separator + "sketch.bin"
+      }));
       execAsynchronously(baseUpload);
     }
 
@@ -98,6 +94,26 @@ public class MakeUploader extends Uploader  {
   }
 
   public boolean burnBootloader() throws RunnerException {
+    Map<String, String> boardPreferences =  Base.getBoardPreferences();
+    String tools      = Base.getArmBasePath();
+    String binTools   = tools + "bin" + File.separator;
+    String uploadPort = Preferences.get("serial.port");
+    List baseUpload;
+    Target t = Base.getTarget();
+    File bootloaderPath = new File(t.getFolder(), "bootloaders");
+    bootloaderPath = new File(bootloaderPath, boardPreferences.get("bootloader.path"));
+    File bootloaderFile = new File(bootloaderPath, boardPreferences.get("bootloader.file"));
+
+    if (verbose || Preferences.getBoolean("upload.verbose")) {
+      baseUpload = new ArrayList(Arrays.asList(new String[] {
+        binTools + "swd-util", uploadPort, "-v", "-a0x0", bootloaderFile.toString()
+      }));
+    } else {
+      baseUpload = new ArrayList(Arrays.asList(new String[] {
+        binTools + "swd-util", uploadPort, "-s", "-a0x0", bootloaderFile.toString()
+      }));
+    }
+    execAsynchronously(baseUpload);
     return true;
   }  
   
@@ -107,6 +123,8 @@ public class MakeUploader extends Uploader  {
   private void execAsynchronously(List commandList) throws RunnerException {
     String[] command = new String[commandList.size()];
     commandList.toArray(command);
+    
+    System.out.print(commandList.toString());
     int result = 0;
     
     if (verbose || Preferences.getBoolean("build.verbose")) {

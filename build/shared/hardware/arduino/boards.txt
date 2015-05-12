@@ -11,6 +11,8 @@ udadr004.build.variant=standard
 udadr004.build.tools=k20
 udadr004.build.xtal=12000000
 udadr004.build.target=UDAD_R004
+udadr004.bootloader.path=k20
+udadr004.bootloader.file=k20_dfu_12mhz.bin
 
 ##############################################################
 
@@ -24,6 +26,8 @@ udadr001.build.variant=standard
 udadr001.build.tools=k20
 udadr001.build.xtal=12000000
 udadr001.build.target=UDAD_R001
+udadr001.bootloader.path=k20
+udadr001.bootloader.file=k20_dfu_12mhz.bin
 
 ##############################################################
 
@@ -36,6 +40,8 @@ k20x12.build.core=k20generic
 k20x12.build.variant=standard
 k20x12.build.tools=k20
 k20x12.build.xtal=12000000
+k20x12.bootloader.path=k20
+k20x12.bootloader.file=k20_dfu_12mhz.bin
 
 ##############################################################
 
@@ -48,6 +54,8 @@ k20rtc.build.core=k20generic
 k20rtc.build.variant=standard
 k20rtc.build.tools=k20
 k20rtc.build.xtal=32768
+k20rtc.bootloader.path=k20
+k20rtc.bootloader.file=k20_dfu_rtc.bin
 
 ##############################################################
 
@@ -59,6 +67,8 @@ k20int.build.mcu=k20
 k20int.build.core=k20generic
 k20int.build.variant=standard
 k20int.build.tools=k20
+k20int.bootloader.path=k20
+k20int.bootloader.file=k20_dfu.bin
 
 ##############################################################
 
