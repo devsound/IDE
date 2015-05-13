@@ -94,6 +94,33 @@ extern "C" {
 #define PULL_UP          (1 << 8)
 #define PULL_DOWN        (1 << 9)
 
+// Arduino functional defines
+#ifdef abs
+#undef abs
+#endif
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+#define abs(x) ((x)>0?(x):-(x))
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#define radians(deg) ((deg)*DEG_TO_RAD)
+#define degrees(rad) ((rad)*RAD_TO_DEG)
+#define sq(x) ((x)*(x))
+#define interrupts() sei()
+#define noInterrupts() cli()
+#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
+#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
+#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
+#define lowByte(w) ((uint8_t) ((w) & 0xff))
+#define highByte(w) ((uint8_t) ((w) >> 8))
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+#define bitSet(value, bit) ((value) |= (1UL << (bit)))
+#define bitClear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bitWrite(value, bit, bitvalue) (bitvalue ? bitSet(value, bit) : bitClear(value, bit))
+
+#define bit(b) (1UL << (b))
+
+
 // Arduino type names
 typedef uint8_t  byte;
 typedef uint16_t word;
@@ -123,7 +150,6 @@ bool analogReadAsync(uint8_t pin, void (*callback)(uint16_t));
 void tone(uint8_t pin, uint32_t frequency);
 void noTone(uint8_t pin);
 void __isr_systick();
-void __isr_udad_systick();
 void exit(int status);
 uint8_t chipSelectFromPin(uint8_t pin);
 

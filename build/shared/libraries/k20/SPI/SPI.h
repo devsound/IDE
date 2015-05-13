@@ -7,6 +7,7 @@
 * Also implements the following extensions:
 *   setSpeed(scale, speed, doubleRate), for K20 specific baudrate control
 *   transfer([chipSelect, ]rxBuffer, rxCount, txBuffer, txCount[, mode]), for buffer transfers
+*   transferAsync([chipSelect, ]rxBuffer, rxCount, txBuffer, txCount[, mode], cb, cbdata), for asynchronous buffer transfers
 *
 * 2015-04-11 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
@@ -23,12 +24,13 @@ extern "C" {
 #endif
 
 // Prototypes for local C code
-void    spi_begin(int pin);
+void    spi_begin(unsigned pin);
 void    spi_setorder(bool order);
 void    spi_setspeed(unsigned pbr, unsigned br, bool dbr);
 void    spi_setdmode(bool cpol, bool cpha);
-void    spi_io(int pin, void *tx, size_t tx_len, void *rx, size_t rx_len, bool last);
-uint8_t spi_iobyte(int pin, uint8_t val, bool last);
+//void    spi_io(unsigned pin, void *tx, size_t tx_len, void *rx, size_t rx_len, bool last);
+void    spi_io(unsigned pin, void *tx, size_t tx_len, void *rx, size_t rx_len, bool last, void (*cb)(void *cbdata), void *cbdata);
+uint8_t spi_iobyte(unsigned pin, uint8_t val, bool last);
 
 #ifdef __cplusplus
 }
@@ -97,8 +99,8 @@ class SPISettings {
 class SPIClass {
   public:
     // Classic Arduino functionality
-    inline void begin(int cspin) { spi_begin(cspin); }
-    inline void begin() { begin(-1); }
+    inline void begin(unsigned cspin) { spi_begin(cspin); }
+    inline void begin() { begin(0); }
     inline void end() {}
     inline void setBitOrder(SPI_order order) { spi_setorder(order); }
     inline void setClockDivider(SPI_speed speed) { spi_setspeed(1, speed, 0); }
@@ -109,16 +111,19 @@ class SPIClass {
       setDataMode(settings.dmode);
     }
     inline void endTransaction() {}
-    inline uint8_t transfer(int cspin, uint8_t val, SPI_tmode mode) { return spi_iobyte(cspin, val, !!mode); }
-    inline uint8_t transfer(int cspin, uint8_t val) { return transfer(cspin, val, SPI_LAST); }
-    inline uint8_t transfer(uint8_t val) { return transfer(-1, val); }
+    inline uint8_t transfer(unsigned cspin, uint8_t val, SPI_tmode mode) { return spi_iobyte(cspin, val, !!mode); }
+    inline uint8_t transfer(unsigned cspin, uint8_t val) { return transfer(cspin, val, SPI_LAST); }
+    inline uint8_t transfer(uint8_t val) { return transfer(0, val); }
     // Deprecated: usingInterrupt
     // Extensions for K20:
     inline void setSpeed(SPI_scale scale, SPI_speed speed, bool doubleRate) { spi_setspeed(scale, speed, doubleRate); }
     inline void setSpeed(SPI_scale scale, SPI_speed speed) { setSpeed(scale, speed, false); }
-    inline void transfer(int cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen, SPI_tmode mode) { spi_io(cspin, txbuf, txlen, rxbuf, rxlen, !!mode); }
-    inline void transfer(int cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen) { transfer(cspin, rxbuf, rxlen, txbuf, txlen); }
-    inline void transfer(void *rxbuf, size_t rxlen, void *txbuf, size_t txlen) { transfer(-1, rxbuf, rxlen, txbuf, txlen); }
+    inline void transfer(unsigned cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen, SPI_tmode mode) { spi_io(cspin, txbuf, txlen, rxbuf, rxlen, !!mode, NULL, NULL); }
+    inline void transfer(unsigned cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen) { transfer(cspin, rxbuf, rxlen, txbuf, txlen, SPI_LAST); }
+    inline void transfer(void *rxbuf, size_t rxlen, void *txbuf, size_t txlen) { transfer(0, rxbuf, rxlen, txbuf, txlen); }
+    inline void transferAsync(unsigned cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen, SPI_tmode mode, void (*cb)(void *cbdata), void *cbdata) { spi_io(cspin, txbuf, txlen, rxbuf, rxlen, !!mode, cb, cbdata); }
+    inline void transferAsync(unsigned cspin, void *rxbuf, size_t rxlen, void *txbuf, size_t txlen, void (*cb)(void *cbdata), void *cbdata) { transferAsync(cspin, rxbuf, rxlen, txbuf, txlen, SPI_LAST, cb, cbdata); }
+    inline void transferAsync(void *rxbuf, size_t rxlen, void *txbuf, size_t txlen, void (*cb)(void *cbdata), void *cbdata) { transferAsync(0, rxbuf, rxlen, txbuf, txlen, cb, cbdata); }
 };
 
 extern SPIClass SPI;

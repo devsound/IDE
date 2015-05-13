@@ -131,31 +131,41 @@ uint8_t serial1_get(void) {
 }
 
 void __isr_uart1(void) {
-	uint32_t head, newhead, tail;
+	uint32_t head, newhead = 0, tail;
 	uint8_t avail;
 	uint8_t volatile c;
 
 	if(UART1.s1.rdrf || UART1.s1.idle) {
 		avail = UART1.rcfifo;
-		if(avail == 0) {
-			c = UART1.d;
-    	UART1.cfifo.raw = ((struct UART_CFIFO_t) {
-    	  .rxflush = 1
+		c = UART1.d; // Read first byte (or clear IDLE)
+		if(!avail) {
+		  // No data was available - this is an IDLE interrupt
+			if(UART1.sfifo.rxuf) {
+			  // RxFIFO underflowed - this is normal, set RXUF to clear
+			  UART1.sfifo.raw = ((struct UART_SFIFO_t) {
+      	  .rxuf= 1
     	}).raw;
 		} else {
-			head = rx_buf_head;
+        // RxFIFO did not underflow - meaning a byte must have been received
+        // after reading RCFIFO but before reading D to clear IDLE. Pass on.
+        avail = 1;
+      }
+		}
+		if(avail) {
+			head = rx_buf_head; // Fetch temporary copy of head, tail
 			tail = rx_buf_tail;
-			do {
-				c = UART1.d;
+			while(1) {
 				newhead = head + 1;
 				if (newhead >= BUF_SIZE) newhead = 0;
 				if (newhead != tail) {
 					head = newhead;
 					rx_buf[head] = c;
 				}
-			} while (--avail > 0);
-			rx_buf_head = head;
+				if(--avail) c = UART1.d; // Read next byte
+				else break; // Done
 		}
+			rx_buf_head = head; // Push new head to RAM
+	}
 	}
 	if ((UART1.c2.tie) && (UART1.s1.tdre)) {
 		head = tx_buf_head;

@@ -23,18 +23,18 @@ void serial_begin(uint32_t baudrate, enum SERIAL_e format) {
 #else
   uint32_t divisor = (F_CPU * 2) / baudrate;
 #endif
-	
-	SIM.scgc4.uart0 = 1; 	// TODO: Use bitband for clocks
-  SIM.scgc5.porta = 1;
+
+  SIM.scgc4.uart0 = 1; 	// TODO: Use bitband for clocks
+  SIM.scgc5.portd = 1;
   rx_buf_head = 0;
   rx_buf_tail = 0;
   tx_buf_head = 0;
   tx_buf_tail = 0;
   tx_en = 0;
   
-  // TODO: Allow alternate pin locations?
-  pin_mode(PIN_PTA1, PIN_MODE_MUX_ALT2); // RX
-  pin_mode(PIN_PTA2, PIN_MODE_MUX_ALT2); // TX
+  // TODO: Allow alternate pin location PTA1, PTA2!
+  pin_mode(PIN_PTD6, PIN_MODE_MUX_ALT3); // RX
+  pin_mode(PIN_PTD7, PIN_MODE_MUX_ALT3); // TX
   
   UART0.bdh.raw = ((struct UART_BDH_t) {
     .sbrh = (divisor >> 13) & 0x1F
@@ -142,7 +142,7 @@ void __isr_uart0(void) {
 		  // No data was available - this is an IDLE interrupt
 			if(UART0.sfifo.rxuf) {
 			  // RxFIFO underflowed - this is normal, set RXUF to clear
-			  UART0.sfifo.raw = ((struct UART_CFIFO_t) {
+			  UART0.sfifo.raw = ((struct UART_SFIFO_t) {
       	  .rxuf= 1
     	}).raw;
 		} else {
@@ -157,7 +157,7 @@ void __isr_uart0(void) {
 			while(1) {
 				newhead = head + 1;
 				if (newhead >= BUF_SIZE) newhead = 0;
-				if (newhead != tail) { // Check for buffer overflow
+				if (newhead != tail) {
 					head = newhead;
 					rx_buf[head] = c;
 				}

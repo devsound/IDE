@@ -39,6 +39,7 @@ beginTransaction	KEYWORD2	SPI_BeginTransaction
 endTransaction	KEYWORD2	SPI_EndTransaction
 setSpeed	KEYWORD2	SPI_SetSpeed
 transfer	KEYWORD2	SPI_Transfer
+transferAsync	KEYWORD2	SPI_TransferAsync
 
 # KEYWORD3 specifies objects
 

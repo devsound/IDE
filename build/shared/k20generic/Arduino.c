@@ -206,6 +206,7 @@ void __isr_systick() {
 // Allows overriding default ISR by sketch (without any overhead as calls are optimized away)
 void isr_systick() __attribute__ ((weak, alias ("__isr_systick")));
 
+// SysTick interrupt entry point
 void SysTick_Handler(void) {
   isr_systick();
 }
