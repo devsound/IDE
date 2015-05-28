@@ -211,6 +211,17 @@ void SysTick_Handler(void) {
   isr_systick();
 }
 
+// Unique processor ID
+uint32_t uniqueId(unsigned n) {
+  switch(n) {
+    case 0: return SIM.uidh;
+    case 1: return SIM.uidmh;
+    case 2: return SIM.uidml;
+    case 3: return SIM.uidl;
+  }
+  return 0;
+}
+
 ALWAYS_INLINE void delay(uint32_t ms) {
   uint32_t start = tickcount;
   while(((uint32_t)(tickcount - start)) < ms);

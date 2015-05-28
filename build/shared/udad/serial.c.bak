@@ -130,7 +130,6 @@ uint8_t serial_get(void) {
 	return c;
 }
 
-/*
 void __isr_uart0(void) {
 	uint32_t head, newhead = 0, tail;
 	uint8_t avail;
@@ -166,64 +165,6 @@ void __isr_uart0(void) {
 				else break; // Done
 			}
 			rx_buf_head = head; // Push new head to RAM
-		}
-	}
-	if ((UART0.c2.tie) && (UART0.s1.tdre)) {
-		head = tx_buf_head;
-		tail = tx_buf_tail;
-		do {
-			if (tail == head) break;
-			if (++tail >= BUF_SIZE) tail = 0;
-			avail = UART0_S1;
-			c = tx_buf[tail];
-			UART0.d = c;
-		} while (UART0_TCFIFO < 8);
-		tx_buf_tail = tail;
-		if (UART0.s1.tdre) UART0.c2.raw = UART0.c2.raw = ((struct UART_C2_t) {
-		  .te = 1,
-		  .re = 1,
-		  .rie = 1,
-		  .ilie = 1,
-		  .tcie = 1
-    }).raw;
-	}
-	if ((UART0.c2.tcie) && (UART0.s1.tc)) {
-		tx_en = 0;
-		UART0.c2.raw = ((struct UART_C2_t) {
-		  .te = 1,
-		  .re = 1,
-		  .rie = 1,
-		  .ilie = 1
-    }).raw;
-	}
-}
-*/
-
-void __isr_uart0(void) {
-	uint32_t head, newhead, tail;
-	uint8_t avail;
-	uint8_t volatile c;
-  
-	if(UART0.s1.rdrf || UART0.s1.idle) {
-		avail = UART0.rcfifo;
-		if(avail == 0) {
-			c = UART0.d;
-    	UART0.cfifo.raw = ((struct UART_CFIFO_t) {
-    	  .rxflush = 1
-    	}).raw;
-		} else {
-			head = rx_buf_head;
-			tail = rx_buf_tail;
-			do {
-				c = UART0.d;
-				newhead = head + 1;
-				if (newhead >= BUF_SIZE) newhead = 0;
-				if (newhead != tail) {
-					head = newhead;
-					rx_buf[head] = c;
-				}
-			} while (--avail > 0);
-			rx_buf_head = head;
 		}
 	}
 	if ((UART0.c2.tie) && (UART0.s1.tdre)) {

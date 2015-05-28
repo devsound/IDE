@@ -1,14 +1,16 @@
 /*
 * Arduino wrapper for I2C peripheral library by MCHCK
 *
-* Implements classic Arduino functionality with exceptions:
-*   TODO: No slave support
+* TODO: Wire is highly incompatible with the MCHCK I2C driver.
+*       Solution is to re-write the MCHCK I2C driver.
 *
 * 2015-05-13 @stg, (cc) https://creativecommons.org/licenses/by/3.0/
 */
 
 #ifndef __K20_WIRE__
 #define __K20_WIRE__
+
+#error "Wire is not supported yet, please feel free to help out! :)"
 
 #include <stdint.h>
 #include <stdbool.h>

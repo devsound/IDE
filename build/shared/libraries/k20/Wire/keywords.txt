@@ -1,45 +1,18 @@
 # LITERAL1 specifies constants
 
-SPI_SCALE_DIV2	LITERAL1	SPI_SetSpeed
-SPI_SCALE_DIV3	LITERAL1	SPI_SetSpeed
-SPI_SCALE_DIV5	LITERAL1	SPI_SetSpeed
-SPI_SCALE_DIV7	LITERAL1	SPI_SetSpeed
-SPI_CLOCK_DIV2	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV4	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV6	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV8	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV16	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV32	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV64	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV128	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV256	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV512	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV1024	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV2048	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV4096	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV8192	LITERAL1	SPI_SetClockDivider
-SPI_CLOCK_DIV16384	LITERAL1	SPI_SetClockDivider
-LSBFIRST	LITERAL1	SPI_SetBitOrder
-MSBFIRST	LITERAL1	SPI_SetBitOrder
-SPI_MODE0	LITERAL1	SPI_SetDataMode
-SPI_MODE1	LITERAL1	SPI_SetDataMode
-SPI_MODE2	LITERAL1	SPI_SetDataMode
-SPI_MODE3	LITERAL1	SPI_SetDataMode
-SPI_CONTINUE	LITERAL1	SPI_Transfer
-SPI_LAST	LITERAL1	SPI_Transfer
-
 # KEYWORD1 specifies datatypes and C/C++ keywords
 
 # KEYWORD2 specifies methods and functions
 
-setBitOrder	KEYWORD2	SPI_SetBitOrder
-setClockDivider	KEYWORD2	SPI_SetClockDivider
-setDataMode	KEYWORD2	SPI_SetDataMode
-beginTransaction	KEYWORD2	SPI_BeginTransaction
-endTransaction	KEYWORD2	SPI_EndTransaction
-setSpeed	KEYWORD2	SPI_SetSpeed
-transfer	KEYWORD2	SPI_Transfer
+onRequest	KEYWORD2	Wire_OnRequest
+onReceive	KEYWORD2	Wire_OnReceive
+read	KEYWORD2	Wire_Read
+available	KEYWORD2	Wire_Available
+write	KEYWORD2	Wire_Write
+endTransmission	KEYWORD2	Wire_EndTransmission
+beginTransmission	KEYWORD2	Wire_BeginTransmission
+requestFrom	KEYWORD2	Wire_RequestFrom
 
 # KEYWORD3 specifies objects
 
-SPI	KEYWORD3	SPI
+Wire	KEYWORD3	Wire

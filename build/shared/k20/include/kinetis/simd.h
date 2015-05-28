@@ -1,9 +1,6 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifdef __cplusplus
- extern "C" {
-#endif
 
 // CM4 SIMD Intrinsics
 __attribute__( ( always_inline ) ) static inline uint32_t __SADD8(uint32_t op1, uint32_t op2)

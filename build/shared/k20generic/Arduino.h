@@ -149,9 +149,12 @@ uint16_t analogRead(uint8_t pin);
 bool analogReadAsync(uint8_t pin, void (*callback)(uint16_t));
 void tone(uint8_t pin, uint32_t frequency);
 void noTone(uint8_t pin);
+
+// Extensions
+uint8_t chipSelectFromPin(uint8_t pin);
+uint32_t uniqueId(unsigned n);
 void __isr_systick();
 void exit(int status);
-uint8_t chipSelectFromPin(uint8_t pin);
 
 #ifdef __cplusplus
 }
